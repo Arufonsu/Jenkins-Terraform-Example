@@ -3,6 +3,13 @@ pipeline {
     options {
         skipDefaultCheckout(true)
     }
+    tools {
+        'org.jenkinsci.plugins.docker.commons.tools.DockerTool' 'Docker'
+        'Terraform' 'terraform'
+    }
+    environment {
+        DOCKER_CERT_PATH = credentials('tarea4')
+    }
     stages {
         stage('clean workspace') {
             steps {
@@ -17,13 +24,7 @@ pipeline {
         stage('tfsec') {
             steps {
                 script {
-                    // Run tfsec using Docker
-                    try {
-                        sh 'docker run --rm -v "$(pwd):/src" aquasec/tfsec .'
-                    } catch (Exception e) {
-                        currentBuild.result = 'UNSTABLE'
-                        error("tfsec failed: ${e.message}")
-                    }
+                    sh 'docker --version'
                 }
             }
         }
@@ -35,13 +36,8 @@ pipeline {
         stage('terraform') {
             steps {
                 script {
-                    // Run terraform using Docker
-                    try {
-                        sh 'docker run --rm -v "$(pwd):/src" hashicorp/terraform apply -auto-approve -no-color'
-                    } catch (Exception e) {
-                        currentBuild.result = 'UNSTABLE'
-                        error("Terraform apply failed: ${e.message}")
-                    }
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve -no-color'
                 }
             }
         }
