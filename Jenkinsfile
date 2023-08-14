@@ -5,8 +5,8 @@ pipeline {
     }
     tools
     {
-        'org.jenkinsci.plugins.docker.commons.tools.DockerTool' 'Docker'
-        'terraform' 'terraform'
+        'org.jenkinsci.plugins.docker.commons.tools.DockerTool' 'Default'
+        'terraform' 'Default'
     }
     environment {
     DOCKER_CERT_PATH = credentials('tarea4')
