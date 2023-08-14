@@ -3,13 +3,12 @@ pipeline {
     options {
         skipDefaultCheckout(true)
     }
-    tools
-    {
+    tools {
         'org.jenkinsci.plugins.docker.commons.tools.DockerTool' 'Default'
-        'terraform' 'Default'
+        'Terraform' 'Default'
     }
     environment {
-    DOCKER_CERT_PATH = credentials('tarea4')
+        DOCKER_CERT_PATH = credentials('tarea4')
     }
     stages {
         stage('clean workspace') {
@@ -22,21 +21,24 @@ pipeline {
                 checkout scm
             }
         }
-    stage('tfsec') {
-      steps {
-        sh ' docker --version'
-      }
-    }
-    stage('Approval for Terraform') {
+        stage('tfsec') {
+            steps {
+                script {
+                    sh 'docker --version'
+                }
+            }
+        }
+        stage('Approval for Terraform') {
             steps {
                 input(message: 'Approval required before Terraform', ok: 'Proceed', submitterParameter: 'APPROVER')
             }
         }
-
         stage('terraform') {
             steps {
-              sh 'terraform init'
-              sh 'terraform apply -auto-approve -no-color'
+                script {
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve -no-color'
+                }
             }
         }
     }
