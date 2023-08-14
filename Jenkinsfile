@@ -14,20 +14,35 @@ pipeline {
                 checkout scm
             }
         }
-    stage('tfsec') {
-      steps {
-        sh ' /usr/local/bin/docker run --rm -v "$(pwd):/src" aquasec/tfsec .'
-      }
-    }
-    stage('Approval for Terraform') {
+        stage('tfsec') {
+            steps {
+                script {
+                    // Run tfsec using Docker
+                    try {
+                        sh 'docker run --rm -v "$(pwd):/src" aquasec/tfsec .'
+                    } catch (Exception e) {
+                        currentBuild.result = 'UNSTABLE'
+                        error("tfsec failed: ${e.message}")
+                    }
+                }
+            }
+        }
+        stage('Approval for Terraform') {
             steps {
                 input(message: 'Approval required before Terraform', ok: 'Proceed', submitterParameter: 'APPROVER')
             }
         }
-
         stage('terraform') {
             steps {
-                sh '/opt/homebrew/bin/terraform apply -auto-approve -no-color'
+                script {
+                    // Run terraform using Docker
+                    try {
+                        sh 'docker run --rm -v "$(pwd):/src" hashicorp/terraform apply -auto-approve -no-color'
+                    } catch (Exception e) {
+                        currentBuild.result = 'UNSTABLE'
+                        error("Terraform apply failed: ${e.message}")
+                    }
+                }
             }
         }
     }
